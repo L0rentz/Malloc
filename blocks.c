@@ -10,8 +10,9 @@
 block_t push_block(size_t to_alloc, block_t *head)
 {
     if ((*head) == NULL) {
-        (*head) = sbrk(to_alloc);
-        (*head)->freed = 1, (*head)->offset = 0;
+        __intptr_t adr = (__intptr_t)sbrk(0);
+        to_alloc = to_alloc + (adr % (getpagesize() * 2));
+        (*head) = sbrk(to_alloc), (*head)->freed = 1, (*head)->offset = 0;
         (*head)->next = (*head), (*head)->prev = (*head);
         (*head)->size = to_alloc - sizeof(struct s_block);
         (*head)->adr = (char *)(*head) + sizeof(struct s_block);
@@ -22,8 +23,7 @@ block_t push_block(size_t to_alloc, block_t *head)
         block->next = (*head), block->prev = (*head)->prev;
         if ((*head)->next == (*head)) (*head)->next = block;
         else (*head)->prev->next = block;
-        (*head)->prev = block;
-        (*head)->offset = 0;
+        (*head)->prev = block, (*head)->offset = 0;
         block->size = to_alloc - sizeof(struct s_block);
         block->adr = (char *)block + sizeof(struct s_block);
         block = merge_prev(block);
@@ -39,9 +39,8 @@ block_t select_block(size_t size, block_t *head)
         align_page(align_mem(size) + sizeof(struct s_block), getpagesize());
     if (tmp != NULL) {
         do {
-            if ((tmp->size == size
-            || size + sizeof(struct s_block) < tmp->size)
-            && tmp->size < closest && tmp->freed == 1) {
+            if (tmp->size >= to_alloc && tmp->size < closest
+            && tmp->freed == 1) {
                 closest = tmp->size;
                 bestfit = tmp;
             }

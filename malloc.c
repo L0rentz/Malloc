@@ -43,7 +43,10 @@ void free(void *adr)
 
 void *realloc(void *ptr, size_t size)
 {
-    if (size == 0) return (NULL);
+    if (size == 0) {
+        free(ptr);
+        return (NULL);
+    }
     if (ptr == NULL) return (malloc(size));
     block_t tmp = head;
     int check = 0;
@@ -51,15 +54,13 @@ void *realloc(void *ptr, size_t size)
         if (tmp->adr == ptr) {
                 check = 1;
                 break;
-        }
-        tmp = tmp->next;
-    }
-    while (tmp != head && check == 0);
+        } tmp = tmp->next;
+    } while (tmp != head && check == 0);
     if (check == 0 || tmp->freed == 1) return (NULL);
     if (size == tmp->size) return (ptr);
     char *new_ptr = malloc(size);
     for (size_t i = 0; i < tmp->size && i < size; i++)
-        new_ptr[i] = ((char *)ptr)[i];
-    free(ptr);
+        new_ptr[i] = ((char *)tmp->adr)[i];
+    free(tmp->adr);
     return (new_ptr);
 }
