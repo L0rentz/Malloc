@@ -13,8 +13,9 @@ void *malloc(size_t size)
 {
     if (size == 0)
         return (NULL);
+    size = align_mem(size);
     block_t bestfit = select_block(size, &head);
-    split_block(size, bestfit, &head);
+    split_block(size, bestfit);
     return (bestfit->adr);
 }
 

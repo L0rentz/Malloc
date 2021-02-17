@@ -17,7 +17,6 @@
 
 typedef struct s_block {
     int freed;
-    int offset;
     void *adr;
     size_t size;
     struct s_block *next;
@@ -28,6 +27,6 @@ block_t merge_prev(block_t to_merge);
 void merge_next(block_t to_merge, block_t *head);
 block_t push_block(size_t to_alloc, block_t *head);
 block_t select_block(size_t size, block_t *head);
-void split_block(size_t size, block_t bestfit, block_t *head);
+void split_block(size_t size, block_t bestfit);
 
 #endif /* !MY_H_ */

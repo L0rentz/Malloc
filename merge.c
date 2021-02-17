@@ -13,15 +13,10 @@ block_t merge_prev(block_t to_merge)
     do {
         if ((char *)to_merge - to_merge->prev->size == to_merge->prev->adr
         && to_merge->prev->freed == 1) {
-            to_merge->prev->size += to_merge->size + to_merge->offset
-                + to_merge->prev->offset + sizeof(struct s_block);
-            to_merge->prev->offset = align_mem(to_merge->prev->size)
-                - to_merge->prev->size;
-            to_merge->prev->size -= to_merge->prev->offset;
+            to_merge->prev->size += to_merge->size + sizeof(struct s_block);
             to_merge->prev->next = to_merge->next;
             to_merge->prev->adr =
-                (char *)to_merge->prev + sizeof(struct s_block)
-                + to_merge->prev->offset;
+                (char *)to_merge->prev + sizeof(struct s_block);
             to_merge->next->prev = to_merge->prev;
             to_merge = to_merge->prev;
         } else check = 1;
@@ -36,13 +31,9 @@ void merge_next(block_t to_merge, block_t *head)
     do {
         if (to_merge->adr + to_merge->size == to_merge->next
         && to_merge->next->freed == 1 && to_merge->next != *head) {
-            to_merge->size += to_merge->next->size + to_merge->next->offset
-                + sizeof(struct s_block) + to_merge->offset;
-            to_merge->offset = (align_mem(to_merge->size) - to_merge->size);
-            to_merge->size -= to_merge->offset;
+            to_merge->size += to_merge->next->size;
             to_merge->next = to_merge->next->next;
-            to_merge->adr = (char *)to_merge + sizeof(struct s_block)
-                + to_merge->offset;
+            to_merge->adr = (char *)to_merge + sizeof(struct s_block);
             to_merge->next->prev = to_merge;
         } else check = 1;
     }
